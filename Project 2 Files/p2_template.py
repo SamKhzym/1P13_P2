@@ -31,9 +31,10 @@ update_thread = repeating_timer(2, update_sim)
 #L&R- open drawer
 
 home = [0.4064, 0.0, 0.4826]
-drop_off = [0.3, 0.3, 0.3]
+drop_off = [-0.6078, 0.2517, 0.3784]
 pick_up = [0.5336, 0.0, 0.043]
 threshold = 0.3
+prev_state = 0
 
 def f_equal(actual, expected, thresh):
     if abs(actual - expected) <= thresh: return True
@@ -49,7 +50,15 @@ def right_up():
 
 def get_state():
     if left_up() and right_up() and f_equal(arm.emg_left(), arm.emg_right(), 0.001):
-
+        return 4
+    if left_up() and right_up():
+        return 3
+    if left_up() and not right_up():
+        return 1
+    if right_up() and not left_up():
+        return 2
+    else:
+        return 0
 
 def at_location(target):
     pos = arm.effector_position()
@@ -57,33 +66,17 @@ def at_location(target):
         and f_equal(pos[1], target[1], 0.0001)
         and f_equal(pos[2], target[2], 0.0001)): return True
     else: return False
-
-def move_end_effctor(num):
-    """if at_location(home): arm.move_arm(*pick_up)
-    if at_location(pick_up): arm.move_arm(*drop_off)
-    if at_location(drop_off): arm.move_arm(*home)"""
-
-    if num==0: arm.move_arm(*pick_up)
-    if num==1: arm.move_arm(*drop_off)
-    if num==2: arm.move_arm(*home)
-
-while True:
-    if left_up():
-        num = int(input())
-        move_end_effctor(num)
-        time.sleep(2)
-        print(at_location(home), at_location(pick_up), at_location(drop_off))
-
+    
 
 '''
-        Name:identify_autoclave_bin_location
+Name: identify_autoclave_bin_location
 
-        Purpose:takes in an object identiy from 1-6, and determines what colour of autoclave, and
-                what opening the object needs to be moved to. Outputs that location data.
+Purpose:takes in an object identiy from 1-6, and determines what colour of autoclave, and
+what opening the object needs to be moved to. Outputs that location data.
 
-        Inputs: object_identity
+Inputs: object_identity
 
-        Output: autoclave_cords
+Output: autoclave_cords
 '''
 def identify_autoclave_bin_location(object_identity):
     #var to hold the cordinates to the corresponding id.
@@ -113,4 +106,17 @@ def identify_autoclave_bin_location(object_identity):
         autoclave_cords = [0.4064, 0.0, 0.4826]
 
     #returning autoclave_cords
-    return(autoclave_cords)     
+    return(autoclave_cords)
+
+def move_end_effctor():
+    print("CALLED")
+    if at_location(home): arm.move_arm(*pick_up)
+    elif at_location(pick_up): arm.move_arm(*drop_off)
+    elif at_location(drop_off): arm.move_arm(*home)
+
+while True:
+    state = get_state()
+    if prev_state != state:
+        print("CHANGE", state)
+        if state == 1: move_end_effctor()
+    prev_state = state
