@@ -66,6 +66,47 @@ def at_location(target):
         and f_equal(pos[1], target[1], 0.0001)
         and f_equal(pos[2], target[2], 0.0001)): return True
     else: return False
+    
+
+'''
+Name: identify_autoclave_bin_location
+
+Purpose:takes in an object identiy from 1-6, and determines what colour of autoclave, and
+what opening the object needs to be moved to. Outputs that location data.
+
+Inputs: object_identity
+
+Output: autoclave_cords
+'''
+def identify_autoclave_bin_location(object_identity):
+    #var to hold the cordinates to the corresponding id.
+    autoclave_cords = [0,0,0]
+
+    #using if statement to determine what the inputted id's autoclave cordinates are.
+    #small red
+    if object_identity == 1:
+        autoclave_cords = [-0.6078, 0.2517, 0.3784]
+    #small green
+    elif object_identity == 2:
+        autoclave_cords = [0.0, -0.6563, 0.4139]
+    #small blue
+    elif object_identity == 3:
+        autoclave_cords = [0.0, 0.6563, 0.4139]
+    #large red
+    elif object_identity == 4:
+        autoclave_cords = [-0.3627, 0.1502, 0.3774]
+    #large green
+    elif object_identity == 5:
+        autoclave_cords = [0.0, -0.4002, 0.412]
+    #large blue
+    elif object_identity == 6:
+        autoclave_cords = [0.0, 0.4002, 0.412]
+    #else return home cordinates
+    else:
+        autoclave_cords = [0.4064, 0.0, 0.4826]
+
+    #returning autoclave_cords
+    return(autoclave_cords)
 
 def move_end_effctor():
     print("CALLED")
