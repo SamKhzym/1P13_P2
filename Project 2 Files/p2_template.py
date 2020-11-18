@@ -66,7 +66,7 @@ def at_location(target):
         and f_equal(pos[1], target[1], 0.0001)
         and f_equal(pos[2], target[2], 0.0001)): return True
     else: return False
-    
+
 
 '''
 Name: identify_autoclave_bin_location
@@ -77,6 +77,8 @@ what opening the object needs to be moved to. Outputs that location data.
 Inputs: object_identity
 
 Output: autoclave_cords
+
+Author: Alex Stewart, stewaa31
 '''
 def identify_autoclave_bin_location(object_identity):
     #var to hold the cordinates to the corresponding id.
