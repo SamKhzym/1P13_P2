@@ -34,7 +34,7 @@ home = [0.4064, 0.0, 0.4826]
 drop_off = [-0.6078, 0.2517, 0.3784]
 pick_up = [0.5336, 0.0, 0.043]
 threshold = 0.3
-prev_state = 0
+prev_state = [False, False, False]
 
 '''
 Name: f_equal
@@ -71,22 +71,13 @@ def right_up():
 
 '''
 Name: get_state
-Purpose: Gets the "state" of the arm emulators
+Purpose: Gets the "state" of the arm emulators as a list of three boolean values
 Inputs: N/A
-Output: Number between 0 and 4 corresponding to 1 of 5 states
+Output: list of three booleans in the form [leftUp, rightUp, armsEqual]
 Author: Samuel Khzym, khzyms
 '''
 def get_state():
-    if left_up() and right_up() and f_equal(arm.emg_left(), arm.emg_right(), 0.001):
-        return 4 #Arms are both up and equal values
-    if left_up() and right_up():
-        return 3 #Arms are both up and NOT equal values
-    if left_up() and not right_up():
-        return 1 #left arm only up
-    if right_up() and not left_up():
-        return 2 #right arm only up
-    else:
-        return 0
+    return [left_up(), right_up(), f_equal(arm.emg_left(), arm.emg_right(), 0.001)]
 
 '''
 Name: at_location
@@ -101,7 +92,6 @@ def at_location(target):
         and f_equal(pos[1], target[1], 0.0001)
         and f_equal(pos[2], target[2], 0.0001)): return True
     else: return False
-
 
 '''
 Name: identify_autoclave_bin_location
@@ -147,21 +137,22 @@ def identify_autoclave_bin_location(object_identity):
 
 '''
 Name: move_end_effctor
-Purpose: Cycles end effector between home, pickup, and dropoff location. If at home, end effector
-moves to pickup. If at pickup, end effector moves to dropoff. If at dropoff, arm returns home.
-Inputs: Current dropoff location
+Purpose: Cycles end effector between home, pickup, and dropoff locationbased on input data from the muscle emulators.
+If at home, end effectormoves to pickup. If at pickup, end effector moves to dropoff.
+If at dropoff, arm returns home. If arm is in unidentifiable position, arm moves home.
+Inputs: List of the previous state of the system, List of the current state of the system, Current dropoff location
 Output: N/A
 Author: Samuel Khzym, khzyms
 '''
-def move_end_effctor():
-    print("CALLED")
-    if at_location(home): arm.move_arm(*pick_up)
-    elif at_location(pick_up): arm.move_arm(*drop_off)
-    elif at_location(drop_off): arm.move_arm(*home)
+def move_end_effector(prev_state, state, dropoff=drop_off):
+    if prev_state[0] != state[0] and state[0] == True and state[2]==False:
+        if at_location(home): arm.move_arm(*pick_up)
+        elif at_location(pick_up): arm.move_arm(*drop_off)
+        elif at_location(dropoff): arm.move_arm(*home)
+        else: arm.move_arm(*home)
 
+#infinite loop for program execution
 while True:
     state = get_state()
-    if prev_state != state:
-        print("CHANGE", state)
-        if state == 1: move_end_effctor()
+    move_end_effector(prev_state, state)
     prev_state = state
