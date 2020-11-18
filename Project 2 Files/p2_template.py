@@ -36,30 +36,65 @@ pick_up = [0.5336, 0.0, 0.043]
 threshold = 0.3
 prev_state = 0
 
+'''
+Name: f_equal
+Purpose: Checks if two floats are equal within a certain tolerance range
+Inputs: actual value, value to be compared to
+Output: boolean (True if floats are equal)
+Author: Samuel Khzym, khzyms
+'''
 def f_equal(actual, expected, thresh):
     if abs(actual - expected) <= thresh: return True
     else: return False
 
+'''
+Name: left_up
+Purpose: Checks if left arm is up past a certain threshold
+Inputs: N/A
+Output: boolean (True if left arm is up)
+Author: Samuel Khzym, khzyms
+'''
 def left_up():
     if arm.emg_left() >= threshold: return True
     else: return False
 
+'''
+Name: right_up
+Purpose: Checks if right arm is up past a certain threshold
+Inputs: N/A
+Output: boolean (True if right arm is up)
+Author: Samuel Khzym, khzyms
+'''
 def right_up():
     if arm.emg_right() >= threshold: return True
     else: return False
 
+'''
+Name: get_state
+Purpose: Gets the "state" of the arm emulators
+Inputs: N/A
+Output: Number between 0 and 4 corresponding to 1 of 5 states
+Author: Samuel Khzym, khzyms
+'''
 def get_state():
     if left_up() and right_up() and f_equal(arm.emg_left(), arm.emg_right(), 0.001):
-        return 4
+        return 4 #Arms are both up and equal values
     if left_up() and right_up():
-        return 3
+        return 3 #Arms are both up and NOT equal values
     if left_up() and not right_up():
-        return 1
+        return 1 #left arm only up
     if right_up() and not left_up():
-        return 2
+        return 2 #right arm only up
     else:
         return 0
 
+'''
+Name: at_location
+Purpose: Determines if the arm is at a certain location
+Inputs: target (list of three values represeinting XYZ coords)
+Output: boolean value (True if arm is at specified target)
+Author: Samuel Khzym, khzyms
+'''
 def at_location(target):
     pos = arm.effector_position()
     if (f_equal(pos[0], target[0], 0.0001)
@@ -110,6 +145,14 @@ def identify_autoclave_bin_location(object_identity):
     #returning autoclave_cords
     return(autoclave_cords)
 
+'''
+Name: move_end_effctor
+Purpose: Cycles end effector between home, pickup, and dropoff location. If at home, end effector
+moves to pickup. If at pickup, end effector moves to dropoff. If at dropoff, arm returns home.
+Inputs: Current dropoff location
+Output: N/A
+Author: Samuel Khzym, khzyms
+'''
 def move_end_effctor():
     print("CALLED")
     if at_location(home): arm.move_arm(*pick_up)
