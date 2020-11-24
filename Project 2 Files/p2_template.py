@@ -3,7 +3,7 @@
 ## Please DO NOT change the naming convention within this template. Some changes may
 ## lead to your program not functioning as intended.
 
-import sys
+import sys, random
 sys.path.append('../')
 
 from Common_Libraries.p2_lib import *
@@ -31,10 +31,8 @@ update_thread = repeating_timer(2, update_sim)
 #L&R- open drawer
 
 home = [0.4064, 0.0, 0.4826]
-drop_off = [-0.6078, 0.2517, 0.3784]
 pick_up = [0.5336, 0.0, 0.043]
 threshold = 0.3
-prev_state = [False, False, False]
 
 '''
 Name: f_equal
@@ -144,15 +142,39 @@ Inputs: List of the previous state of the system, List of the current state of t
 Output: N/A
 Author: Samuel Khzym, khzyms
 '''
-def move_end_effector(prev_state, state, dropoff=drop_off):
+def move_end_effector(prev_state, state, dropoff):
     if prev_state[0] != state[0] and state[0] == True and state[2]==False:
-        if at_location(home): arm.move_arm(*pick_up)
-        elif at_location(pick_up): arm.move_arm(*drop_off)
-        elif at_location(dropoff): arm.move_arm(*home)
-        else: arm.move_arm(*home)
+        if at_location(home):
+            arm.move_arm(*pick_up)
+            return False
+        elif at_location(pick_up):
+            arm.move_arm(*dropoff)
+            return False
+        elif at_location(dropoff):
+            arm.move_arm(*home)
+            return True
+        else:
+            arm.move_arm(*home)
+            return False
+            
+def main():
+    container_sequence = [i for i in range(1,7,1)]
+    random.shuffle(container_sequence)
+    prev_state = [False, False, False]
+    finish_cycle = False
+    
+    #infinite loop for program execution
+    for i in container_sequence:
+        print("YEE",i)
+        arm.spawn_cage(i)
+        dropoff = identify_autoclave_bin_location(i)
+        
+        while not finish_cycle:
+            state = get_state()
+            finish_cycle = move_end_effector(prev_state, state, dropoff)
+            prev_state = state
 
-#infinite loop for program execution
-while True:
-    state = get_state()
-    move_end_effector(prev_state, state)
-    prev_state = state
+        finish_cycle = False
+
+if __name__ == "__main__":
+    main()
