@@ -156,12 +156,50 @@ def move_end_effector(prev_state, state, dropoff):
         else:
             arm.move_arm(*home)
             return False
+
+'''
+Name: control_gripper
+
+Purpose:Takes in the state of the emulated arm
+
+Inputs:(prev_state, state, grip_open)
+
+Output: (True, False)
+
+Author: Alex Stewart, stewaa31
+'''
+def control_gripper(prev_state, state, grip_open):
+    #checking if the right arm was just moved up, and that both arms are not up.
+    if state[1] != prev_state[1] and state[1] == True and state[2] == False:
+        
+        #arm is in position, see what the gripper position is, change to opposite
+        if grip_open:
+            
+            #gripper is open so setting gripper close
+            arm.control_gripper(45)
+
+            #sending back if the gripper is open, True or False
+            #just closed, so False
+            return(False)
+        else:
+            #gripper is closed, so setting gripper open
+            arm.control_gripper(-45)
+
+            #sending back if the gripper is open, True or False
+            #just opened, so True
+            return(True)
+
+    #else just return the sent gripper position
+    return(grip_open)
+
             
 def main():
     container_sequence = [i for i in range(1,7,1)]
     random.shuffle(container_sequence)
     prev_state = [False, False, False]
     finish_cycle = False
+    #holds whether gripper is open, default set to true, as program starts gripper open
+    grip_open = True
     
     #infinite loop for program execution
     for i in container_sequence:
@@ -172,6 +210,8 @@ def main():
         while not finish_cycle:
             state = get_state()
             finish_cycle = move_end_effector(prev_state, state, dropoff)
+            #opening/closing the gripper if only the right arm is up
+            grip_open = control_gripper(prev_state, state, grip_open)
             prev_state = state
 
         finish_cycle = False
