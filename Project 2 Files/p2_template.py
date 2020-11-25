@@ -33,10 +33,7 @@ update_thread = repeating_timer(2, update_sim)
 home = [0.4064, 0.0, 0.4826]
 pick_up = [0.5336, 0.0, 0.043]
 threshold = 0.3
-<<<<<<< Updated upstream
-=======
 drawer_open = [False, False, False]
->>>>>>> Stashed changes
 
 '''
 Name: f_equal
@@ -195,8 +192,6 @@ def move_end_effector(prev_state, state, dropoff):
         else:
             arm.move_arm(*home)
             return False
-<<<<<<< Updated upstream
-=======
 
 def open_autoclave_bin_drawer(prev_state, state, c_id):
     print(arms_locked_moving(prev_state, state))
@@ -212,7 +207,6 @@ def open_autoclave_bin_drawer(prev_state, state, c_id):
         elif c_id == 6:
             drawer_open[2] = not drawer_open[2]
             arm.open_blue_autoclave(drawer_open[2])
->>>>>>> Stashed changes
             
 def main():
     container_sequence = [i for i in range(1,7,1)]
@@ -231,13 +225,11 @@ def main():
         while not finish_cycle:
             state = get_state()
             finish_cycle = move_end_effector(prev_state, state, dropoff)
-<<<<<<< Updated upstream
-=======
+
             #opening/closing the gripper if only the right arm is up
             grip_open = control_gripper(prev_state, state, grip_open)
             open_autoclave_bin_drawer(prev_state, state, i)
             #time.sleep(.2)
->>>>>>> Stashed changes
             prev_state = state
 
         finish_cycle = False
