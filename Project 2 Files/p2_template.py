@@ -135,41 +135,6 @@ def identify_autoclave_bin_location(object_identity):
     return(autoclave_cords)
 
 '''
-Name: control_gripper
-
-Purpose:Takes in the state of the emulated arm
-
-Inputs:(prev_state, state, grip_open)
-
-Output: (True, False)
-
-Author: Alex Stewart, stewaa31
-'''
-def control_gripper(prev_state, state, grip_open):
-    #checking if the right arm was just moved up, and that both arms are not up.
-    if state[1] != prev_state[1] and state[1] == True and state[2] == False and arms_locked_moving(prev_state, state) == False:
-
-        #arm is in position, see what the gripper position is, change to opposite
-        if grip_open:
-
-            #gripper is open so setting gripper close
-            arm.control_gripper(45)
-
-            #sending back if the gripper is open, True or False
-            #just closed, so False
-            return(False)
-        else:
-            #gripper is closed, so setting gripper open
-            arm.control_gripper(-45)
-
-            #sending back if the gripper is open, True or False
-            #just opened, so True
-            return(True)
-
-    #else just return the sent gripper position
-    return(grip_open)
-
-'''
 Name: move_end_effctor
 Purpose: Cycles end effector between home, pickup, and dropoff locationbased on input data from the muscle emulators.
 If at home, end effectormoves to pickup. If at pickup, end effector moves to dropoff.
@@ -193,6 +158,41 @@ def move_end_effector(prev_state, state, dropoff):
             arm.move_arm(*home)
             return False
 
+'''
+Name: control_gripper
+
+Purpose:Takes in the state of the emulated arm
+
+Inputs:(prev_state, state, grip_open)
+
+Output: (True, False)
+
+Author: Alex Stewart, stewaa31
+'''
+def control_gripper(prev_state, state, grip_open):
+    #checking if the right arm was just moved up, and that both arms are not up.
+    if state[1] != prev_state[1] and state[1] == True and state[2] == False:
+        
+        #arm is in position, see what the gripper position is, change to opposite
+        if grip_open:
+            
+            #gripper is open so setting gripper close
+            arm.control_gripper(45)
+
+            #sending back if the gripper is open, True or False
+            #just closed, so False
+            return(False)
+        else:
+            #gripper is closed, so setting gripper open
+            arm.control_gripper(-45)
+
+            #sending back if the gripper is open, True or False
+            #just opened, so True
+            return(True)
+
+    #else just return the sent gripper position
+    return(grip_open)
+
 def open_autoclave_bin_drawer(prev_state, state, c_id):
     print(arms_locked_moving(prev_state, state))
     if arms_locked_moving(prev_state, state) and state[0] == True and state[1] == True:
@@ -207,6 +207,7 @@ def open_autoclave_bin_drawer(prev_state, state, c_id):
         elif c_id == 6:
             drawer_open[2] = not drawer_open[2]
             arm.open_blue_autoclave(drawer_open[2])
+
             
 def main():
     container_sequence = [i for i in range(1,7,1)]
@@ -218,13 +219,14 @@ def main():
     
     #infinite loop for program execution
     for i in container_sequence:
-        print("YEE",i)
         arm.spawn_cage(i)
         dropoff = identify_autoclave_bin_location(i)
         
         while not finish_cycle:
             state = get_state()
             finish_cycle = move_end_effector(prev_state, state, dropoff)
+            #opening/closing the gripper if only the right arm is up
+            grip_open = control_gripper(prev_state, state, grip_open)
 
             #opening/closing the gripper if only the right arm is up
             grip_open = control_gripper(prev_state, state, grip_open)
