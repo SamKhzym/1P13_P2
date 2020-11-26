@@ -33,6 +33,7 @@ update_thread = repeating_timer(2, update_sim)
 home = [0.4064, 0.0, 0.4826]
 pick_up = [0.5336, 0.0, 0.043]
 threshold = 0.3
+drawer_open = [False, False, False]
 
 '''
 Name: f_equal
@@ -192,6 +193,21 @@ def control_gripper(prev_state, state, grip_open):
     #else just return the sent gripper position
     return(grip_open)
 
+def open_autoclave_bin_drawer(prev_state, state, c_id):
+    print(arms_locked_moving(prev_state, state))
+    if arms_locked_moving(prev_state, state) and state[0] == True and state[1] == True:
+        if c_id < 3:
+            print("Invalid container ID. Cannot open drawer")
+        elif c_id == 4:
+            drawer_open[0] = not drawer_open[0]
+            arm.open_red_autoclave(drawer_open[0])
+        elif c_id == 5:
+            drawer_open[1] = not drawer_open[1]
+            arm.open_green_autoclave(drawer_open[1])
+        elif c_id == 6:
+            drawer_open[2] = not drawer_open[2]
+            arm.open_blue_autoclave(drawer_open[2])
+
             
 def main():
     container_sequence = [i for i in range(1,7,1)]
@@ -203,7 +219,6 @@ def main():
     
     #infinite loop for program execution
     for i in container_sequence:
-        print("YEE",i)
         arm.spawn_cage(i)
         dropoff = identify_autoclave_bin_location(i)
         
@@ -212,6 +227,11 @@ def main():
             finish_cycle = move_end_effector(prev_state, state, dropoff)
             #opening/closing the gripper if only the right arm is up
             grip_open = control_gripper(prev_state, state, grip_open)
+
+            #opening/closing the gripper if only the right arm is up
+            grip_open = control_gripper(prev_state, state, grip_open)
+            open_autoclave_bin_drawer(prev_state, state, i)
+            #time.sleep(.2)
             prev_state = state
 
         finish_cycle = False
