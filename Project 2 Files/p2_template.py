@@ -126,13 +126,13 @@ def identify_autoclave_bin_location(object_identity):
         autoclave_cords = [0.0, 0.6563, 0.4139]
     #large red
     elif object_identity == 4:
-        autoclave_cords = [-0.3627, 0.1502, 0.3774]
+        autoclave_cords = [-0.3627, 0.1502, 0.312]
     #large green
     elif object_identity == 5:
-        autoclave_cords = [0.0, -0.4002, 0.412]
+        autoclave_cords = [0.0, -0.4002, 0.312]
     #large blue
     elif object_identity == 6:
-        autoclave_cords = [0.0, 0.4002, 0.412]
+        autoclave_cords = [0.0, 0.4002, 0.312]
     #else return home cordinates
     else:
         autoclave_cords = [0.4064, 0.0, 0.4826]
@@ -159,14 +159,14 @@ def control_gripper(prev_state, state, grip_open):
         if grip_open:
 
             #gripper is open so setting gripper close
-            arm.control_gripper(45)
+            arm.control_gripper(35)
 
             #sending back if the gripper is open, True or False
             #just closed, so False
             return(False)
         else:
             #gripper is closed, so setting gripper open
-            arm.control_gripper(-45)
+            arm.control_gripper(-35)
 
             #sending back if the gripper is open, True or False
             #just opened, so True
