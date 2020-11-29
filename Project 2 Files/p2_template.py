@@ -185,7 +185,7 @@ Output: N/A
 Author: Samuel Khzym, khzyms
 '''
 def move_end_effector(prev_state, state, dropoff):
-    if prev_state[0] != state[0] and state[0] == True and arms_locked_moving(prev_state, state) == False:
+    if prev_state[0] != state[0] and state[0] == True and arms_locked_moving(prev_state, state) == False and state[2] == False:
         if at_location(home):
             arm.move_arm(*pick_up)
             return False
@@ -204,11 +204,24 @@ def move_end_effector(prev_state, state, dropoff):
             arm.move_arm(*home)
             return False
 
+'''
+Name: open_autoclave_bin_drawer
+Purpose: Opens or closes the autoclave bin drawer corresponding with the proper container and colour
+Inputs: List of the previous state of the system, List of the current state of the system, Current container ID
+Output: N/A
+Author: Samuel Khzym, khzyms
+'''
 def open_autoclave_bin_drawer(prev_state, state, c_id):
-    #print(arms_locked_moving(prev_state, state))
-    if arms_locked_moving(prev_state, state) and state[0] == True and state[1] == True:
+
+    #Execute if both arms are moving at the same time and both arms are currently above the threshold
+    if arms_locked_moving(prev_state, state) and state[0] == True and state[1] == True and prev_state[0] == False or state[2] == True and state[1] == True and state[0] == True and prev_state[0] == False:
+
+        #If the container is small, print a short error message to console
         if c_id < 3:
             print("Invalid container ID. Cannot open drawer")
+
+        #If the container is large, change the internal state of the system to indicate the change in state of
+        #the drawer and set the drawer to that new state
         elif c_id == 4:
             drawer_open[0] = not drawer_open[0]
             arm.open_red_autoclave(drawer_open[0])
@@ -220,6 +233,8 @@ def open_autoclave_bin_drawer(prev_state, state, c_id):
             arm.open_blue_autoclave(drawer_open[2])
 
 def main():
+
+    #Creates a list of integers between 1 and 6
     container_sequence = [i for i in range(1,7,1)]
     random.shuffle(container_sequence)
     prev_state = [False, False, False, 0, 0]
@@ -233,12 +248,21 @@ def main():
         dropoff = identify_autoclave_bin_location(i)
 
         while not finish_cycle:
+            
+            #Gets the current state of the muscle sensor emulators
             state = get_state()
+            #print(state, "\n", prev_state)
+
+            #Moves the end effector to the proper location if the left arm changes state to up
             finish_cycle = move_end_effector(prev_state, state, dropoff)
+            
             #opening/closing the gripper if only the right arm is up
             grip_open = control_gripper(prev_state, state, grip_open)
+
+            #Opens autoclave drawer if both hands are moving and their state changes to up
             open_autoclave_bin_drawer(prev_state, state, i)
-            #time.sleep(.2)
+
+            #Saves the current state to be used for comparison in the next iteration
             prev_state = state
 
         finish_cycle = False
