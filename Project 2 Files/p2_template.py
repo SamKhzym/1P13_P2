@@ -141,30 +141,6 @@ def identify_autoclave_bin_location(object_identity):
     return(autoclave_cords)
 
 '''
-Name: move_end_effctor
-Purpose: Cycles end effector between home, pickup, and dropoff locationbased on input data from the muscle emulators.
-If at home, end effectormoves to pickup. If at pickup, end effector moves to dropoff.
-If at dropoff, arm returns home. If arm is in unidentifiable position, arm moves home.
-Inputs: List of the previous state of the system, List of the current state of the system, Current dropoff location
-Output: N/A
-Author: Samuel Khzym, khzyms
-'''
-def move_end_effector(prev_state, state, dropoff):
-    if prev_state[0] != state[0] and state[0] == True and state[2]==False:
-        if at_location(home):
-            arm.move_arm(*pick_up)
-            return False
-        elif at_location(pick_up):
-            arm.move_arm(*dropoff)
-            return False
-        elif at_location(dropoff):
-            arm.move_arm(*home)
-            return True
-        else:
-            arm.move_arm(*home)
-            return False
-
-'''
 Name: control_gripper
 
 Purpose:Takes in the state of the emulated arm
@@ -177,11 +153,11 @@ Author: Alex Stewart, stewaa31
 '''
 def control_gripper(prev_state, state, grip_open):
     #checking if the right arm was just moved up, and that both arms are not up.
-    if state[1] != prev_state[1] and state[1] == True and state[2] == False:
-        
+    if state[1] != prev_state[1] and state[1] == True and state[2] == False and arms_locked_moving(prev_state, state) == False:
+
         #arm is in position, see what the gripper position is, change to opposite
         if grip_open:
-            
+
             #gripper is open so setting gripper close
             arm.control_gripper(45)
 
@@ -209,7 +185,7 @@ Output: N/A
 Author: Samuel Khzym, khzyms
 '''
 def move_end_effector(prev_state, state, dropoff):
-    if prev_state[0] != state[0] and state[0] == True and arms_locked_moving(prev_state, state) == False:
+    if prev_state[0] != state[0] and state[0] == True and arms_locked_moving(prev_state, state) == False and state[2] == False:
         if at_location(home):
             arm.move_arm(*pick_up)
             return False
@@ -223,11 +199,24 @@ def move_end_effector(prev_state, state, dropoff):
             arm.move_arm(*home)
             return False
 
+'''
+Name: open_autoclave_bin_drawer
+Purpose: Opens or closes the autoclave bin drawer corresponding with the proper container and colour
+Inputs: List of the previous state of the system, List of the current state of the system, Current container ID
+Output: N/A
+Author: Samuel Khzym, khzyms
+'''
 def open_autoclave_bin_drawer(prev_state, state, c_id):
-    #print(arms_locked_moving(prev_state, state))
-    if arms_locked_moving(prev_state, state) and state[0] == True and state[1] == True:
+
+    #Execute if both arms are moving at the same time and both arms are currently above the threshold
+    if arms_locked_moving(prev_state, state) and state[0] == True and state[1] == True and prev_state[0] == False or state[2] == True and state[1] == True and state[0] == True and prev_state[0] == False:
+
+        #If the container is small, print a short error message to console
         if c_id < 3:
             print("Invalid container ID. Cannot open drawer")
+
+        #If the container is large, change the internal state of the system to indicate the change in state of
+        #the drawer and set the drawer to that new state
         elif c_id == 4:
             drawer_open[0] = not drawer_open[0]
             arm.open_red_autoclave(drawer_open[0])
@@ -237,9 +226,10 @@ def open_autoclave_bin_drawer(prev_state, state, c_id):
         elif c_id == 6:
             drawer_open[2] = not drawer_open[2]
             arm.open_blue_autoclave(drawer_open[2])
-
             
 def main():
+
+    #Creates a list of integers between 1 and 6
     container_sequence = [i for i in range(1,7,1)]
     random.shuffle(container_sequence)
     prev_state = [False, False, False, 0, 0]
@@ -253,12 +243,21 @@ def main():
         dropoff = identify_autoclave_bin_location(i)
         
         while not finish_cycle:
+            
+            #Gets the current state of the muscle sensor emulators
             state = get_state()
+            #print(state, "\n", prev_state)
+
+            #Moves the end effector to the proper location if the left arm changes state to up
             finish_cycle = move_end_effector(prev_state, state, dropoff)
+            
             #opening/closing the gripper if only the right arm is up
             grip_open = control_gripper(prev_state, state, grip_open)
+
+            #Opens autoclave drawer if both hands are moving and their state changes to up
             open_autoclave_bin_drawer(prev_state, state, i)
-            #time.sleep(.2)
+
+            #Saves the current state to be used for comparison in the next iteration
             prev_state = state
 
         finish_cycle = False
