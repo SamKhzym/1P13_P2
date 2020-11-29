@@ -141,30 +141,6 @@ def identify_autoclave_bin_location(object_identity):
     return(autoclave_cords)
 
 '''
-Name: move_end_effctor
-Purpose: Cycles end effector between home, pickup, and dropoff locationbased on input data from the muscle emulators.
-If at home, end effectormoves to pickup. If at pickup, end effector moves to dropoff.
-If at dropoff, arm returns home. If arm is in unidentifiable position, arm moves home.
-Inputs: List of the previous state of the system, List of the current state of the system, Current dropoff location
-Output: N/A
-Author: Samuel Khzym, khzyms
-'''
-def move_end_effector(prev_state, state, dropoff):
-    if prev_state[0] != state[0] and state[0] == True and state[2]==False:
-        if at_location(home):
-            arm.move_arm(*pick_up)
-            return False
-        elif at_location(pick_up):
-            arm.move_arm(*dropoff)
-            return False
-        elif at_location(dropoff):
-            arm.move_arm(*home)
-            return True
-        else:
-            arm.move_arm(*home)
-            return False
-
-'''
 Name: control_gripper
 
 Purpose:Takes in the state of the emulated arm
@@ -177,11 +153,11 @@ Author: Alex Stewart, stewaa31
 '''
 def control_gripper(prev_state, state, grip_open):
     #checking if the right arm was just moved up, and that both arms are not up.
-    if state[1] != prev_state[1] and state[1] == True and state[2] == False:
-        
+    if state[1] != prev_state[1] and state[1] == True and state[2] == False and arms_locked_moving(prev_state, state) == False:
+
         #arm is in position, see what the gripper position is, change to opposite
         if grip_open:
-            
+
             #gripper is open so setting gripper close
             arm.control_gripper(45)
 
@@ -237,7 +213,6 @@ def open_autoclave_bin_drawer(prev_state, state, c_id):
         elif c_id == 6:
             drawer_open[2] = not drawer_open[2]
             arm.open_blue_autoclave(drawer_open[2])
-
             
 def main():
     container_sequence = [i for i in range(1,7,1)]
