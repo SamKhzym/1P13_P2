@@ -190,6 +190,11 @@ def move_end_effector(prev_state, state, dropoff):
             arm.move_arm(*pick_up)
             return False
         elif at_location(pick_up):
+            #moving the arm up to avoid potential clipping with an autoautoclave
+            arm.rotate_shoulder(-45)
+            #pausing program to allow for smooth arm movements
+            time.sleep(2)
+            #Moving the arm to the drop off location
             arm.move_arm(*dropoff)
             return False
         elif at_location(dropoff):
@@ -213,7 +218,7 @@ def open_autoclave_bin_drawer(prev_state, state, c_id):
         elif c_id == 6:
             drawer_open[2] = not drawer_open[2]
             arm.open_blue_autoclave(drawer_open[2])
-            
+
 def main():
     container_sequence = [i for i in range(1,7,1)]
     random.shuffle(container_sequence)
@@ -221,12 +226,12 @@ def main():
     finish_cycle = False
     #holds whether gripper is open, default set to true, as program starts gripper open
     grip_open = True
-    
+
     #infinite loop for program execution
     for i in container_sequence:
         arm.spawn_cage(i)
         dropoff = identify_autoclave_bin_location(i)
-        
+
         while not finish_cycle:
             state = get_state()
             finish_cycle = move_end_effector(prev_state, state, dropoff)
