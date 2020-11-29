@@ -76,7 +76,13 @@ Output: list of three booleans in the form [leftUp, rightUp, armsEqual]
 Author: Samuel Khzym, khzyms
 '''
 def get_state():
-    return [left_up(), right_up(), f_equal(arm.emg_left(), arm.emg_right(), 0.001)]
+    return [left_up(), right_up(), f_equal(arm.emg_left(), arm.emg_right(), 0.1), arm.emg_left(), arm.emg_right()]
+
+
+
+def arms_locked_moving(prev_state, state):
+    if not f_equal(prev_state[3], state[3], 0.001) and not f_equal(prev_state[4], state[4], 0.001): return True
+    else: return False
 
 '''
 Name: at_location
@@ -172,14 +178,14 @@ def control_gripper(prev_state, state, grip_open):
 '''
 Name: move_end_effctor
 Purpose: Cycles end effector between home, pickup, and dropoff locationbased on input data from the muscle emulators.
-If at home, end effectormoves to pickup. If at pickup, end effector moves to dropoff.
+If at home, end effector moves to pickup. If at pickup, end effector moves to dropoff.
 If at dropoff, arm returns home. If arm is in unidentifiable position, arm moves home.
 Inputs: List of the previous state of the system, List of the current state of the system, Current dropoff location
 Output: N/A
 Author: Samuel Khzym, khzyms
 '''
 def move_end_effector(prev_state, state, dropoff):
-    if prev_state[0] != state[0] and state[0] == True and state[2]==False:
+    if prev_state[0] != state[0] and state[0] == True and arms_locked_moving(prev_state, state) == False:
         if at_location(home):
             arm.move_arm(*pick_up)
             return False
@@ -194,7 +200,7 @@ def move_end_effector(prev_state, state, dropoff):
             return False
 
 def open_autoclave_bin_drawer(prev_state, state, c_id):
-    print(arms_locked_moving(prev_state, state))
+    #print(arms_locked_moving(prev_state, state))
     if arms_locked_moving(prev_state, state) and state[0] == True and state[1] == True:
         if c_id < 3:
             print("Invalid container ID. Cannot open drawer")
@@ -211,21 +217,19 @@ def open_autoclave_bin_drawer(prev_state, state, c_id):
 def main():
     container_sequence = [i for i in range(1,7,1)]
     random.shuffle(container_sequence)
-    prev_state = [False, False, False]
+    prev_state = [False, False, False, 0, 0]
     finish_cycle = False
     #holds whether gripper is open, default set to true, as program starts gripper open
     grip_open = True
     
     #infinite loop for program execution
     for i in container_sequence:
-        print("YEE",i)
         arm.spawn_cage(i)
         dropoff = identify_autoclave_bin_location(i)
         
         while not finish_cycle:
             state = get_state()
             finish_cycle = move_end_effector(prev_state, state, dropoff)
-
             #opening/closing the gripper if only the right arm is up
             grip_open = control_gripper(prev_state, state, grip_open)
             open_autoclave_bin_drawer(prev_state, state, i)
