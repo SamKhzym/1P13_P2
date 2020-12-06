@@ -32,7 +32,7 @@ update_thread = repeating_timer(2, update_sim)
 
 #Initializes global variables
 home = [0.4064, 0.0, 0.4826]
-pick_up = [0.5336, 0.0, 0.043]
+pick_up = [0.5336, 0.0, 0.03]
 threshold = 0.3
 drawer_open = [False, False, False]
 state = [False, False, False, 0, 0]
@@ -125,22 +125,22 @@ def identify_autoclave_bin_location(object_identity):
     #using if statement to determine what the inputted id's autoclave coordinates are.
     #small red
     if object_identity == 1:
-        autoclave_coords = [-0.6078, 0.2517, 0.395]
+        autoclave_coords = [-0.62, 0.24, 0.39]
     #small green
     elif object_identity == 2:
-        autoclave_coords = [0.0, -0.6563, 0.395]
+        autoclave_coords = [0.0, -0.6563, 0.39]
     #small blue
     elif object_identity == 3:
-        autoclave_coords = [0.0, 0.6563, 0.395]
+        autoclave_coords = [0.0, 0.6563, 0.39]
     #large red
     elif object_identity == 4:
-        autoclave_coords = [-0.37, 0.17, 0.314]
+        autoclave_coords = [-0.4, 0.12, 0.314]
     #large green
     elif object_identity == 5:
-        autoclave_coords = [0.0, -0.405, 0.312]
+        autoclave_coords = [0.0, -0.41, 0.312]
     #large blue
     elif object_identity == 6:
-        autoclave_coords = [0.0, 0.405, 0.312]
+        autoclave_coords = [0.0, 0.41, 0.312]
     #else return home cordinates
     else:
         autoclave_coords = [0.4064, 0.0, 0.4826]
@@ -216,14 +216,14 @@ def control_gripper(grip_open):
         if grip_open:
 
             #gripper is open so setting gripper close
-            arm.control_gripper(31)
+            arm.control_gripper(30)
 
             #sending back if the gripper is open, True or False
             #just closed, so False
             return(False)
         else:
             #gripper is closed, so setting gripper open
-            arm.control_gripper(-31)
+            arm.control_gripper(-30)
 
             #sending back if the gripper is open, True or False
             #just opened, so True
@@ -286,6 +286,8 @@ def main():
     random.shuffle(container_sequence)
 
     for i in container_sequence:
+
+        #i = 6
 
         #Spawns container based on randomized ID, gets coords for dropoff location of that container
         arm.spawn_cage(i)
