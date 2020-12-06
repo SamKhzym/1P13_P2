@@ -125,14 +125,12 @@ def identify_autoclave_bin_location(object_identity):
     #using if statement to determine what the inputted id's autoclave coordinates are.
     #small red
     if object_identity == 1:
-        autoclave_coords = [-0.6078, 0.2517, 0.3784]
         autoclave_coords = [-0.6078, 0.2517, 0.395]
     #small green
     elif object_identity == 2:
         autoclave_coords = [0.0, -0.6563, 0.395]
     #small blue
     elif object_identity == 3:
-        autoclave_coords = [0.0, 0.6563, 0.4139]
         autoclave_coords = [0.0, 0.6563, 0.395]
     #large red
     elif object_identity == 4:
