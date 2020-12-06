@@ -134,7 +134,7 @@ def identify_autoclave_bin_location(object_identity):
         autoclave_coords = [0.0, 0.6563, 0.39]
     #large red
     elif object_identity == 4:
-        autoclave_coords = [-0.4, 0.12, 0.314]
+        autoclave_coords = [-0.4, 0.16, 0.314]
     #large green
     elif object_identity == 5:
         autoclave_coords = [0.0, -0.405, 0.312]
