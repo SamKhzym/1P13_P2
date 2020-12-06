@@ -287,8 +287,6 @@ def main():
 
     for i in container_sequence:
 
-        #i = 1
-
         #Spawns container based on randomized ID, gets coords for dropoff location of that container
         arm.spawn_cage(i)
         dropoff = identify_autoclave_bin_location(i)
