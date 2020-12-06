@@ -137,10 +137,10 @@ def identify_autoclave_bin_location(object_identity):
         autoclave_coords = [-0.4, 0.12, 0.314]
     #large green
     elif object_identity == 5:
-        autoclave_coords = [0.0, -0.41, 0.312]
+        autoclave_coords = [0.0, -0.405, 0.312]
     #large blue
     elif object_identity == 6:
-        autoclave_coords = [0.0, 0.41, 0.312]
+        autoclave_coords = [0.0, 0.405, 0.312]
     #else return home cordinates
     else:
         autoclave_coords = [0.4064, 0.0, 0.4826]
@@ -164,7 +164,7 @@ def move_end_effector(dropoff):
 
     #Updates the global variable containing the state of the muscle sensor emulators
     state = get_state()
-    
+
     if (prev_state[0] != state[0] and state[0] == True
         and arms_locked_moving(prev_state, state) == False and state[2] == False):
 
@@ -207,7 +207,7 @@ def control_gripper(grip_open):
 
     global state
     global prev_state
-    
+
     #checking if the right arm was just moved up, and that both arms are not up.
     if (state[1] != prev_state[1] and state[1] == True and state[2] == False
         and arms_locked_moving(prev_state, state) == False):
@@ -240,7 +240,7 @@ Output: N/A
 Author: Samuel Khzym, khzyms
 '''
 def open_autoclave_bin_drawer(c_id):
-    
+
     global state
     global prev_state
 
@@ -277,7 +277,7 @@ Author: Samuel Khzym, khzyms; Alex Stewart
 def main():
     #boolean value that holds whether the current container's execution cycle is complete (default set to False)
     finish_cycle = False
-    
+
     #boolean value that holds whether gripper is open (default set to True as program starts with gripper open)
     grip_open = True
 
@@ -299,7 +299,7 @@ def main():
 
             #Moves the end effector to the proper location if the left arm changes state to up
             finish_cycle = move_end_effector(dropoff)
-            
+
             #opening/closing the gripper if only the right arm is up
             grip_open = control_gripper(grip_open)
 
