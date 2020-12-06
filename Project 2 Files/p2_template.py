@@ -126,21 +126,23 @@ def identify_autoclave_bin_location(object_identity):
     #small red
     if object_identity == 1:
         autoclave_coords = [-0.6078, 0.2517, 0.3784]
+        autoclave_coords = [-0.6078, 0.2517, 0.395]
     #small green
     elif object_identity == 2:
-        autoclave_coords = [0.0, -0.6563, 0.4139]
+        autoclave_coords = [0.0, -0.6563, 0.395]
     #small blue
     elif object_identity == 3:
         autoclave_coords = [0.0, 0.6563, 0.4139]
+        autoclave_coords = [0.0, 0.6563, 0.395]
     #large red
     elif object_identity == 4:
-        autoclave_coords = [-0.3627, 0.1502, 0.314]
+        autoclave_coords = [-0.37, 0.17, 0.314]
     #large green
     elif object_identity == 5:
-        autoclave_coords = [0.0, -0.4002, 0.312]
+        autoclave_coords = [0.0, -0.405, 0.312]
     #large blue
     elif object_identity == 6:
-        autoclave_coords = [0.0, 0.4002, 0.312]
+        autoclave_coords = [0.0, 0.405, 0.312]
     #else return home cordinates
     else:
         autoclave_coords = [0.4064, 0.0, 0.4826]
@@ -176,6 +178,8 @@ def move_end_effector(dropoff):
         #If at pickup, move arm up to avoid bumping into autoclaves, then go to dropoff
         elif at_location(pick_up):
             arm.rotate_shoulder(-45)
+            time.sleep(1)
+            arm.move_arm(dropoff[0], dropoff[1], dropoff[2]+0.05)
             time.sleep(1)
             arm.move_arm(*dropoff)
             return False
@@ -214,14 +218,14 @@ def control_gripper(grip_open):
         if grip_open:
 
             #gripper is open so setting gripper close
-            arm.control_gripper(35)
+            arm.control_gripper(31)
 
             #sending back if the gripper is open, True or False
             #just closed, so False
             return(False)
         else:
             #gripper is closed, so setting gripper open
-            arm.control_gripper(-35)
+            arm.control_gripper(-31)
 
             #sending back if the gripper is open, True or False
             #just opened, so True
@@ -284,6 +288,8 @@ def main():
     random.shuffle(container_sequence)
 
     for i in container_sequence:
+
+        #i = 1
 
         #Spawns container based on randomized ID, gets coords for dropoff location of that container
         arm.spawn_cage(i)
